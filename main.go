@@ -12,6 +12,13 @@ type AuthRequest struct {
 	password    string
 }
 
+type AuthResponse struct {
+	apiKeyValid bool
+	apiKey      string
+	userId      string
+	password    string
+}
+
 type AuthServiceIf interface {
 	Init(ad AuthDatastore)
 	Add(authReq *AuthRequest) (*AuthRequest, error)
@@ -29,8 +36,8 @@ func mapAuthRequestToAuthRecord(authReq *AuthRequest) *AuthRecord {
 	}
 }
 
-func mapAuthRecordToAuthRequest(authRecord *AuthRecord) *AuthRequest {
-	return &AuthRequest{
+func mapAuthRecordToAuthResponse(authRecord *AuthRecord) *AuthResponse {
+	return &AuthResponse{
 		apiKeyValid: authRecord.apiKeyValid,
 		apiKey:      authRecord.apiKey,
 		userId:      authRecord.userId,
@@ -46,19 +53,21 @@ func (as *AuthService) Init(ad AuthDatastore) {
 	as.authDatastore = ad
 }
 
-func (as *AuthService) Add(authReq *AuthRequest) (*AuthRequest, error) {
+func (as *AuthService) Add(authReq *AuthRequest) (*AuthResponse, error) {
 	aRec := mapAuthRequestToAuthRecord(authReq)
 	_, err := as.authDatastore.Insert(aRec)
 	fmt.Println("Add: ", aRec)
 	fmt.Println("Existing Add err: ", err)
-	return authReq, err
+	authRsp := mapAuthRecordToAuthResponse(aRec)
+	return authRsp, err
 }
 
-func (as *AuthService) Remove(authReq *AuthRequest) (*AuthRequest, error) {
+func (as *AuthService) Remove(authReq *AuthRequest) (*AuthResponse, error) {
 	aRec := mapAuthRequestToAuthRecord(authReq)
 	_, err := as.authDatastore.Remove(aRec)
 	fmt.Println("Existing Remove err: ", err)
-	return authReq, err
+	authRsp := mapAuthRecordToAuthResponse(aRec)
+	return authRsp, err
 }
 
 func (as *AuthService) Authenticate(authReq *AuthRequest) (bool, error) {
@@ -72,6 +81,16 @@ func (as *AuthService) Authenticate(authReq *AuthRequest) (bool, error) {
 	return true, nil
 }
 
+/*
+ * Map containing Auth Record
+ * Key : apiKey or userId
+ * Value: AuthRecord  (also has apiKey or User ID which duplication of key)
+ * TBD: Prepare a new record which is having apiKeyValue, apiKey and password only
+ * and the key to the database should be user id
+ * TBD: implement update password
+ * TBD: reissue API Key
+ * Divide the project into 3 files: main.go, auth.go, auth_datastore.go
+ */
 type AuthRecord struct {
 	apiKeyValid bool
 	apiKey      string
@@ -79,6 +98,7 @@ type AuthRecord struct {
 	password    string
 }
 
+// TBD: Read about Go Interfaces
 type AuthDatastore interface {
 	Init()
 	Insert(authRecord *AuthRecord) (*AuthRecord, error)
@@ -127,7 +147,11 @@ func (amd *AuthMapDatastore) Insert(authRecord *AuthRecord) (*AuthRecord, error)
 	if ok {
 		return nil, errors.New("AuthRecord already exists")
 	}
-	amd.authMap[authRecord.apiKey] = *authRecord
+	if authRecord.apiKeyValid {
+		amd.authMap[authRecord.apiKey] = *authRecord
+	} else {
+		amd.authMap[authRecord.userId] = *authRecord
+	}
 	amd.DumpDB()
 	fmt.Println("Exiting Insert")
 	return authRecord, nil
@@ -139,9 +163,9 @@ func (amd *AuthMapDatastore) Get(authRecordIn *AuthRecord) (*AuthRecord, error) 
 	var ok bool
 	var authRecord AuthRecord
 	if authRecordIn.apiKeyValid {
-		_, ok = amd.authMap[authRecordIn.apiKey]
+		authRecord, ok = amd.authMap[authRecordIn.apiKey]
 	} else {
-		_, ok = amd.authMap[authRecordIn.userId]
+		authRecord, ok = amd.authMap[authRecordIn.userId]
 	}
 	// no record found, return error
 	if !ok {
@@ -184,6 +208,12 @@ func (amd *AuthMapDatastore) Update(authRecord *AuthRecord) (*AuthRecord, error)
 	return nil, errors.New("AuthRecord does not exist")
 }
 
+/*
+ * Pending activitie:
+ * 1. Map key should be User ID
+ * And each record can contain User's API Key and User's Password
+ *
+ */
 func main() {
 	fmt.Println("Entered main")
 
@@ -208,6 +238,7 @@ func main() {
 		fmt.Println("first: ", first)
 		switch first {
 		case 1:
+			// TBD: correct the msg and say API Key
 			fmt.Println("Add an auth-key")
 			fmt.Scanln(&apiKey)
 			ar := AuthRequest{apiKey: apiKey, apiKeyValid: true}
