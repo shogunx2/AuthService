@@ -132,80 +132,126 @@ func (amd *AuthMapDatastore) Init() {
 	amd.authMap = make(map[string]AuthRecord)
 }
 
+func (amd *AuthMapDatastore) getRecord(key string) *AuthRecord {
+	authRecord, ok := amd.authMap[key]
+	if !ok {
+		return nil
+	}
+	return &authRecord
+}
+
+func (amd *AuthMapDatastore) setRecord(key string, ar *AuthRecord) {
+	fmt.Println("Entering setRecord")
+	fmt.Println("ar: ", ar)
+	amd.authMap[key] = *ar
+	fmt.Println("Exiting setRecord")
+}
+
 func (amd *AuthMapDatastore) Insert(authRecord *AuthRecord) (*AuthRecord, error) {
 	fmt.Println("Entered Insert")
+	var ar *AuthRecord
+	var key string
+	if authRecord.apiKeyValid {
+		key = authRecord.apiKey
+	} else {
+		key = authRecord.userId
+	}
+	if len(key) == 0 {
+		return nil, errors.New("invalid key")
+	}
 	// check if the authRecord exists
-	var ok bool
-	if authRecord.apiKeyValid {
-		_, ok = amd.authMap[authRecord.apiKey]
-	} else {
-		_, ok = amd.authMap[authRecord.userId]
-	}
+	fmt.Println("key: ", key)
+	ar = amd.getRecord(key)
 	// if exists return error
-	// else insert the authRecord into the map
 	// return the authRecord
-	if ok {
-		return nil, errors.New("AuthRecord already exists")
+	if ar != nil {
+		return nil, errors.New("authRecord already exists")
 	}
-	if authRecord.apiKeyValid {
-		amd.authMap[authRecord.apiKey] = *authRecord
-	} else {
-		amd.authMap[authRecord.userId] = *authRecord
-	}
+	fmt.Println("set record")
+	// else insert the authRecord into the map
+	amd.setRecord(key, authRecord)
 	amd.DumpDB()
 	fmt.Println("Exiting Insert")
-	return authRecord, nil
+	return ar, nil
 }
 
 func (amd *AuthMapDatastore) Get(authRecordIn *AuthRecord) (*AuthRecord, error) {
 	fmt.Println("Entered Get")
 	// check if the authRecord exists
-	var ok bool
-	var authRecord AuthRecord
+	var ar *AuthRecord
+	var key string
 	if authRecordIn.apiKeyValid {
-		authRecord, ok = amd.authMap[authRecordIn.apiKey]
+		key = authRecordIn.apiKey
 	} else {
-		authRecord, ok = amd.authMap[authRecordIn.userId]
+		key = authRecordIn.userId
 	}
+	if len(key) == 0 {
+		return nil, errors.New("invalid key")
+	}
+	// check if the authRecord exists
+	ar = amd.getRecord(key)
 	// no record found, return error
-	if !ok {
+	if ar == nil {
 		amd.DumpDB()
 		return nil, errors.New("AuthRecord does not exist")
 	}
 	// record exists return the authRecord
 	amd.DumpDB()
 	fmt.Println("Exiting Get")
-	return &authRecord, nil
+	return ar, nil
 }
 
 func (amd *AuthMapDatastore) Remove(authRecord *AuthRecord) (*AuthRecord, error) {
 	fmt.Println("Entered Remove")
-	// check if the authRecord exists
-	// if exists remove the authRecord
-	// else return error
-	if _, ok := amd.authMap[authRecord.apiKey]; ok {
-		delete(amd.authMap, authRecord.apiKey)
-		amd.DumpDB()
-		return authRecord, nil
+	var ar *AuthRecord
+	var key string
+
+	if authRecord.apiKeyValid {
+		key = authRecord.apiKey
+	} else {
+		key = authRecord.userId
 	}
+	if len(key) == 0 {
+		return nil, errors.New("invalid key")
+	}
+	// check if the authRecord exists
+	ar = amd.getRecord(key)
+	// no record found, return error
+	if ar == nil {
+		amd.DumpDB()
+		return nil, errors.New("AuthRecord does not exist")
+	}
+	// if exists remove the authRecord
+	delete(amd.authMap, key)
 	amd.DumpDB()
 	fmt.Println("Exiting Remove")
-	return nil, errors.New("AuthRecord does not exist")
+	return ar, nil
 }
 
 func (amd *AuthMapDatastore) Update(authRecord *AuthRecord) (*AuthRecord, error) {
 	fmt.Println("Entered Update")
-	// check if the authRecord exists
-	// if exists update the authRecord
-	// else return error
-	if _, ok := amd.authMap[authRecord.apiKey]; ok {
-		amd.authMap[authRecord.apiKey] = *authRecord
-		amd.DumpDB()
-		return authRecord, nil
+	var ar *AuthRecord
+	var key string
+
+	if authRecord.apiKeyValid {
+		key = authRecord.apiKey
+	} else {
+		key = authRecord.userId
 	}
+	if len(key) == 0 {
+		return nil, errors.New("invalid key")
+	}
+	// check if the authRecord exists
+	ar = amd.getRecord(key)
+	// no record found, return error
+	if ar == nil {
+		amd.DumpDB()
+		return nil, errors.New("AuthRecord does not exist")
+	}
+	amd.authMap[key] = *authRecord
 	amd.DumpDB()
 	fmt.Println("Exiting Update")
-	return nil, errors.New("AuthRecord does not exist")
+	return authRecord, nil
 }
 
 /*
