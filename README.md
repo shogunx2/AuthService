@@ -1,35 +1,46 @@
-AuthServer
+# AuthServer
+
 AuthServer is a simple authentication server implemented in Go. It provides basic functionality for managing and authenticating users using either API keys or username/password combinations.
 
-Features
-Add new users with API keys or username/password
-Authenticate users using API keys or username/password
-In-memory storage using a map-based datastore
-Web interface for interaction with server
-Usage
+## Features
+
+- Add new users with API keys or username/password
+- Authenticate users using API keys or username/password
+- In-memory storage using a map-based datastore
+- Web interface implemented for interacting with AuthServer
+
+## Usage
+
 To run the AuthServer:
 
-Ensure you have Go installed on your system
-Clone this repository
-Navigate to the project directory
-Run the command: go run main.go
-Interacting with the Server
+1. Ensure you have Go installed on your system
+2. Clone this repository
+3. Navigate to the project directory
+4. Run the command: `go run main.go`
+
+## Interacting with the Server
+
 The server provides a command-line interface with the following options:
 
-Add an API key
-Add a user ID and password
-Authenticate with an API key
-Authenticate with a user ID and password
+1. Add an API key
+2. Add a user ID and password
+3. Authenticate with an API key
+4. Authenticate with a user ID and password
+
 Follow the prompts to perform the desired action.
 
-Future Improvements
-Implement persistent storage
-Add password update functionality
-Implement API key reissuance
-Improve error handling and user feedback
-Add unit tests for better code coverage
-Contributing
+## Future Improvements
+
+- Implement persistent storage
+- Add password update functionality
+- Implement API key reissuance
+- Improve error handling and user feedback
+- Add unit tests for better code coverage
+
+## Contributing
+
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-License
-This project is open source and available under the MIT License.
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
