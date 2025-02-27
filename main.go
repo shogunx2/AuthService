@@ -88,14 +88,9 @@ func (as *AuthService) Authenticate(authReq *AuthRequest) (bool, error) {
 
 /*
  * Map containing Auth Record
- * Key : ApiKey or UserId
- * Value: AuthRecord  (also has ApiKey or User ID which duplication of key)
- * TBD: Prepare a new record which is having ApiKeyValue, ApiKey and Password only
- * and the key to the database should be user id
  * TBD: implement update Password
  * TBD: reissue API Key
- * Divide the project into 3 files: main.go, auth.go, auth_datastore.go
- */
+*/
 type AuthRecord struct {
 	ApiKeyValid bool
 	ApiKey      string
@@ -103,7 +98,6 @@ type AuthRecord struct {
 	Password    string
 }
 
-// TBD: Read about Go Interfaces
 type AuthDatastore interface {
 	Init()
 	Insert(authRecord *AuthRecord) (*AuthRecord, error)
