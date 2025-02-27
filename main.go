@@ -6,17 +6,17 @@ import (
 )
 
 type AuthRequest struct {
-	apiKeyValid bool
-	apiKey      string
-	userId      string
-	password    string
+	ApiKeyValid bool   `json:"api_key_valid"`
+	ApiKey      string `json:"api_key"`
+	UserId      string `json:"user_id"`
+	Password    string `json:"Password"`
 }
 
 type AuthResponse struct {
-	apiKeyValid bool
-	apiKey      string
-	userId      string
-	password    string
+	ApiKeyValid bool
+	ApiKey      string
+	UserId      string
+	Password    string
 }
 
 type AuthServiceIf interface {
@@ -29,19 +29,19 @@ type AuthServiceIf interface {
 
 func mapAuthRequestToAuthRecord(authReq *AuthRequest) *AuthRecord {
 	return &AuthRecord{
-		apiKeyValid: authReq.apiKeyValid,
-		apiKey:      authReq.apiKey,
-		userId:      authReq.userId,
-		password:    authReq.password,
+		ApiKeyValid: authReq.ApiKeyValid,
+		ApiKey:      authReq.ApiKey,
+		UserId:      authReq.UserId,
+		Password:    authReq.Password,
 	}
 }
 
 func mapAuthRecordToAuthResponse(authRecord *AuthRecord) *AuthResponse {
 	return &AuthResponse{
-		apiKeyValid: authRecord.apiKeyValid,
-		apiKey:      authRecord.apiKey,
-		userId:      authRecord.userId,
-		password:    authRecord.password,
+		ApiKeyValid: authRecord.ApiKeyValid,
+		ApiKey:      authRecord.ApiKey,
+		UserId:      authRecord.UserId,
+		Password:    authRecord.Password,
 	}
 }
 
@@ -77,25 +77,30 @@ func (as *AuthService) Authenticate(authReq *AuthRequest) (bool, error) {
 		fmt.Println("Existing Authenticate (false) err: ", err)
 		return false, err
 	}
-	fmt.Println("Existing Authenticate (true) err: ", err)
+	if aRec.Password == authReq.Password{
+		fmt.Println("Existing Authenticate (true) err: ", err)
+	}else{
+		fmt.Println("Existing Authenticate (false) err: ", err)
+		return false, err
+	}
 	return true, nil
 }
 
 /*
  * Map containing Auth Record
- * Key : apiKey or userId
- * Value: AuthRecord  (also has apiKey or User ID which duplication of key)
- * TBD: Prepare a new record which is having apiKeyValue, apiKey and password only
+ * Key : ApiKey or UserId
+ * Value: AuthRecord  (also has ApiKey or User ID which duplication of key)
+ * TBD: Prepare a new record which is having ApiKeyValue, ApiKey and Password only
  * and the key to the database should be user id
- * TBD: implement update password
+ * TBD: implement update Password
  * TBD: reissue API Key
  * Divide the project into 3 files: main.go, auth.go, auth_datastore.go
  */
 type AuthRecord struct {
-	apiKeyValid bool
-	apiKey      string
-	userId      string
-	password    string
+	ApiKeyValid bool
+	ApiKey      string
+	UserId      string
+	Password    string
 }
 
 // TBD: Read about Go Interfaces
@@ -113,10 +118,10 @@ type AuthMapDatastore struct {
 
 func printAuthRecord(key string, ar *AuthRecord) {
 	fmt.Println("key: ", key)
-	fmt.Println("apiKeyValid: ", ar.apiKeyValid)
-	fmt.Println("apiKey: ", ar.apiKey)
-	fmt.Println("userId: ", ar.userId)
-	fmt.Println("password: ", ar.password)
+	fmt.Println("ApiKeyValid: ", ar.ApiKeyValid)
+	fmt.Println("ApiKey: ", ar.ApiKey)
+	fmt.Println("UserId: ", ar.UserId)
+	fmt.Println("Password: ", ar.Password)
 }
 
 func (amd *AuthMapDatastore) DumpDB() {
@@ -151,10 +156,10 @@ func (amd *AuthMapDatastore) Insert(authRecord *AuthRecord) (*AuthRecord, error)
 	fmt.Println("Entered Insert")
 	var ar *AuthRecord
 	var key string
-	if authRecord.apiKeyValid {
-		key = authRecord.apiKey
+	if authRecord.ApiKeyValid {
+		key = authRecord.ApiKey
 	} else {
-		key = authRecord.userId
+		key = authRecord.UserId
 	}
 	if len(key) == 0 {
 		return nil, errors.New("invalid key")
@@ -180,11 +185,12 @@ func (amd *AuthMapDatastore) Get(authRecordIn *AuthRecord) (*AuthRecord, error) 
 	// check if the authRecord exists
 	var ar *AuthRecord
 	var key string
-	if authRecordIn.apiKeyValid {
-		key = authRecordIn.apiKey
+	if authRecordIn.ApiKeyValid {
+		key = authRecordIn.ApiKey
 	} else {
-		key = authRecordIn.userId
+		key = authRecordIn.UserId
 	}
+	fmt.Println("key:",key)
 	if len(key) == 0 {
 		return nil, errors.New("invalid key")
 	}
@@ -206,10 +212,10 @@ func (amd *AuthMapDatastore) Remove(authRecord *AuthRecord) (*AuthRecord, error)
 	var ar *AuthRecord
 	var key string
 
-	if authRecord.apiKeyValid {
-		key = authRecord.apiKey
+	if authRecord.ApiKeyValid {
+		key = authRecord.ApiKey
 	} else {
-		key = authRecord.userId
+		key = authRecord.UserId
 	}
 	if len(key) == 0 {
 		return nil, errors.New("invalid key")
@@ -233,10 +239,10 @@ func (amd *AuthMapDatastore) Update(authRecord *AuthRecord) (*AuthRecord, error)
 	var ar *AuthRecord
 	var key string
 
-	if authRecord.apiKeyValid {
-		key = authRecord.apiKey
+	if authRecord.ApiKeyValid {
+		key = authRecord.ApiKey
 	} else {
-		key = authRecord.userId
+		key = authRecord.UserId
 	}
 	if len(key) == 0 {
 		return nil, errors.New("invalid key")
@@ -260,77 +266,77 @@ func (amd *AuthMapDatastore) Update(authRecord *AuthRecord) (*AuthRecord, error)
  * And each record can contain User's API Key and User's Password
  *
  */
-func main() {
-	fmt.Println("Entered main")
+// func main() {
+// 	fmt.Println("Entered main")
 
-	var first int
-	var apiKey string
-	var user string
-	var password string
+// 	var first int
+// 	var ApiKey string
+// 	var user string
+// 	var Password string
 
-	// init Authenticaion Map Datastore
-	amd := AuthMapDatastore{}
-	amd.Init()
+// 	// init Authenticaion Map Datastore
+// 	amd := AuthMapDatastore{}
+// 	amd.Init()
 
-	as := AuthService{}
-	as.Init(&amd)
+// 	as := AuthService{}
+// 	as.Init(&amd)
 
-	for {
-		fmt.Println("Enter 1 to add an api-key")
-		fmt.Println("Enter 2 to add a user id and password")
-		fmt.Println("Enter 3 to authenticate with an api-key")
-		fmt.Println("Enter 4 to authenticate with a user id and password")
-		fmt.Scanln(&first)
-		fmt.Println("first: ", first)
-		switch first {
-		case 1:
-			// TBD: correct the msg and say API Key
-			fmt.Println("Add an auth-key")
-			fmt.Scanln(&apiKey)
-			ar := AuthRequest{apiKey: apiKey, apiKeyValid: true}
-			arOut, err := as.Add(&ar)
-			if err != nil {
-				fmt.Println("Add error: ", err)
-			} else {
-				fmt.Println("Add result: ", arOut)
-			}
-		case 2:
-			fmt.Println("Enter user Id")
-			fmt.Scanln(&user)
-			fmt.Println("Enter password")
-			fmt.Scanln(&password)
-			ar := AuthRequest{userId: user, apiKeyValid: false, password: password}
-			fmt.Println("Invoking Add with user id and password")
-			arOut, err := as.Add(&ar)
-			if err != nil {
-				fmt.Println("Add error: ", err)
-			} else {
-				fmt.Println("Add result: ", arOut)
-			}
-		case 3:
-			fmt.Println("Enter auth-key to authenticate")
-			fmt.Scanln(&apiKey)
-			ar := AuthRequest{apiKey: apiKey, apiKeyValid: true}
-			authResult, err := as.Authenticate(&ar)
-			if err != nil {
-				fmt.Println("auth error: ", err)
-			} else {
-				fmt.Println("auth result: ", authResult)
-			}
-		case 4:
-			fmt.Println("Case 4")
-			fmt.Println("Enter user Id")
-			fmt.Scanln(&user)
-			fmt.Println("Enter password")
-			fmt.Scanln(&password)
-			ar := AuthRequest{userId: user, apiKeyValid: false, password: password}
-			authResult, err := as.Authenticate(&ar)
-			if err != nil {
-				fmt.Println("auth error: ", err)
-			} else {
-				fmt.Println("auth result: ", authResult)
-			}
-		default:
-		}
-	}
-}
+// 	for {
+// 		fmt.Println("Enter 1 to add an api-key")
+// 		fmt.Println("Enter 2 to add a user id and Password")
+// 		fmt.Println("Enter 3 to authenticate with an api-key")
+// 		fmt.Println("Enter 4 to authenticate with a user id and Password")
+// 		fmt.Scanln(&first)
+// 		fmt.Println("first: ", first)
+// 		switch first {
+// 		case 1:
+// 			// TBD: correct the msg and say API Key
+// 			fmt.Println("Add an auth-key")
+// 			fmt.Scanln(&ApiKey)
+// 			ar := AuthRequest{ApiKey: ApiKey, ApiKeyValid: true}
+// 			arOut, err := as.Add(&ar)
+// 			if err != nil {
+// 				fmt.Println("Add error: ", err)
+// 			} else {
+// 				fmt.Println("Add result: ", arOut)
+// 			}
+// 		case 2:
+// 			fmt.Println("Enter user Id")
+// 			fmt.Scanln(&user)
+// 			fmt.Println("Enter Password")
+// 			fmt.Scanln(&Password)
+// 			ar := AuthRequest{UserId: user, ApiKeyValid: false, Password: Password}
+// 			fmt.Println("Invoking Add with user id and Password")
+// 			arOut, err := as.Add(&ar)
+// 			if err != nil {
+// 				fmt.Println("Add error: ", err)
+// 			} else {
+// 				fmt.Println("Add result: ", arOut)
+// 			}
+// 		case 3:
+// 			fmt.Println("Enter auth-key to authenticate")
+// 			fmt.Scanln(&ApiKey)
+// 			ar := AuthRequest{ApiKey: ApiKey, ApiKeyValid: true}
+// 			authResult, err := as.Authenticate(&ar)
+// 			if err != nil {
+// 				fmt.Println("auth error: ", err)
+// 			} else {
+// 				fmt.Println("auth result: ", authResult)
+// 			}
+// 		case 4:
+// 			fmt.Println("Case 4")
+// 			fmt.Println("Enter user Id")
+// 			fmt.Scanln(&user)
+// 			fmt.Println("Enter Password")
+// 			fmt.Scanln(&Password)
+// 			ar := AuthRequest{UserId: user, ApiKeyValid: false, Password: Password}
+// 			authResult, err := as.Authenticate(&ar)
+// 			if err != nil {
+// 				fmt.Println("auth error: ", err)
+// 			} else {
+// 				fmt.Println("auth result: ", authResult)
+// 			}
+// 		default:
+// 		}
+// 	}
+// }
