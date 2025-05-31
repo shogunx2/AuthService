@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/rs/cors"
+
 	DAO "github.com/shogunx2/AuthService/dao"
-	Services "github.com/shogunx2/AuthService/services"
+	services "github.com/shogunx2/AuthService/services"
 
 	_ "github.com/lib/pq"
 )
@@ -24,13 +26,13 @@ func main() {
 	apgd := DAO.AuthPGDatastore{}
 	apgd.Init()
 
-	as := Services.AuthService{}
+	as := services.AuthService{}
 	as.Init(&apgd)
 
 	http.HandleFunc("/", helloHandler)
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("add function start")
-		var authReq Services.AuthRequest
+		var authReq services.AuthRequest
 		fmt.Println("Body: ", r.Body)
 		err := json.NewDecoder(r.Body).Decode(&authReq)
 		if err != nil {
@@ -54,7 +56,7 @@ func main() {
 
 	http.HandleFunc("/remove", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("add function start")
-		var authReq Services.AuthRequest
+		var authReq services.AuthRequest
 		fmt.Println("Body: ", r.Body)
 		err := json.NewDecoder(r.Body).Decode(&authReq)
 		if err != nil {
@@ -77,7 +79,7 @@ func main() {
 	})
 
 	http.HandleFunc("/authenticate", func(w http.ResponseWriter, r *http.Request) {
-		var authReq Services.AuthRequest
+		var authReq services.AuthRequest
 		err := json.NewDecoder(r.Body).Decode(&authReq)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -99,8 +101,48 @@ func main() {
 		fmt.Println("*******************************")
 	})
 
+	http.HandleFunc("/UpdatePassword", func(w http.ResponseWriter, r *http.Request) {
+		var authReq services.AuthRequest
+		err := json.NewDecoder(r.Body).Decode(&authReq)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		fmt.Println("-------------------------")
+		fmt.Println(authReq)
+		authResp, err := as.UpdatePassword(&authReq)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		json.NewEncoder(w).Encode(authResp)
+		fmt.Println("UpdatePassword function called")
+		fmt.Fprintf(w, "UpdatePassword function called")
+		fmt.Println("*******************************")
+	})
+	http.HandleFunc("/UpdateAPIkey", func(w http.ResponseWriter, r *http.Request) {
+		var authReq services.AuthRequest
+		err := json.NewDecoder(r.Body).Decode(&authReq)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		fmt.Println("-------------------------")
+		fmt.Println(authReq)
+		authResp, err := as.UpdateApiKey(&authReq)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		json.NewEncoder(w).Encode(authResp)
+		fmt.Println("UpdateAPIkey function called")
+		fmt.Fprintf(w, "UpdateAPIkey function called")
+		fmt.Println("*******************************")
+	})
+
 	fmt.Println("Starting server on :8080")
-	err := http.ListenAndServe(":8080", nil)
+	handler := cors.Default().Handler(http.DefaultServeMux)
+	err := http.ListenAndServe(":8080", handler)
 	if err != nil {
 		fmt.Printf("Error starting server: %s\n", err)
 	}
