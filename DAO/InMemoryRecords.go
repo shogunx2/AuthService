@@ -11,10 +11,6 @@ CREATE TABLE user_record (userid   VARCHAR(255) PRIMARY KEY, password    VARCHAR
 */
 /*
  * Map containing Auth Record
- * Key : ApiKey or UserId
- * Value: AuthRecord  (also has ApiKey or User ID which duplication of key)
- * TBD: Prepare a new record which is having ApiKeyValue, ApiKey and Password only
- * and the key to the database should be user id
  * TBD: implement update Password
  * TBD: reissue API Key
  * Divide the project into 3 files: main.go, auth.go, auth_datastore.go
