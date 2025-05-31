@@ -1,15 +1,13 @@
-package DAO
+package dao
 
-import (
-	//"errors"
-	//"fmt"
-)
+//"errors"
+//"fmt"
 
 type AuthRecord struct {
-    UserId      string
-    Password    string
-    ApiKey      string
-    ApiKeyValid bool
+	UserId      string
+	Password    string
+	ApiKey      string
+	ApiKeyValid bool
 }
 
 type AuthDatastore interface {

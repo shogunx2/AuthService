@@ -1,8 +1,8 @@
-package DAO
+package dao
 
 import (
-	"fmt"
 	"database/sql"
+	"fmt"
 )
 
 type AuthPGDatastore struct {
@@ -20,7 +20,7 @@ func (apgd *AuthPGDatastore) Init() {
 
 func (apgd *AuthPGDatastore) Insert(authRecord *AuthRecord) (*AuthRecord, error) {
 	fmt.Println("Entered Insert")
-	ar := &AuthRecord{}	
+	ar := &AuthRecord{}
 	var key string
 	if authRecord.ApiKeyValid {
 		key = authRecord.ApiKey
@@ -37,7 +37,7 @@ func (apgd *AuthPGDatastore) Insert(authRecord *AuthRecord) (*AuthRecord, error)
 		return nil, err
 	}
 	if existingRecord != nil {
-		return existingRecord, nil 
+		return existingRecord, nil
 	}
 
 	query := "INSERT INTO user_record (userid, password, apikey, apikeyvalid) VALUES ($1, $2, $3, $4) RETURNING userid, password, apikey, apikeyvalid"
@@ -68,7 +68,7 @@ func (apgd *AuthPGDatastore) Get(authRecord *AuthRecord) (*AuthRecord, error) {
 	err := apgd.DB.QueryRow(query, key, key).Scan(&ar.UserId, &ar.Password, &ar.ApiKey, &ar.ApiKeyValid)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil 
+			return nil, nil
 		}
 		return nil, fmt.Errorf("error retrieving record: %v", err)
 	}

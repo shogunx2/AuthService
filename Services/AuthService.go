@@ -1,8 +1,9 @@
-package Services
+package services
 
 import (
 	"fmt"
-	DAO "github.com/ayushnema/AuthService/DAO"
+
+	DAO "github.com/shogunx2/AuthService/DAO"
 )
 
 type AuthRequest struct {
