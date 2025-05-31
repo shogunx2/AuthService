@@ -1,91 +1,14 @@
-package main
+package DAO
 
 import (
 	"errors"
 	"fmt"
 )
 
-type AuthRequest struct {
-	ApiKeyValid bool   `json:"api_key_valid"`
-	ApiKey      string `json:"api_key"`
-	UserId      string `json:"user_id"`
-	Password    string `json:"Password"`
-}
+/*
+CREATE TABLE user_record (userid   VARCHAR(255) PRIMARY KEY, password    VARCHAR(255) NOT NULL, apikey     VARCHAR(255),  apikeyvalid BOOLEAN NOT NULL DEFAULT FALSE);
 
-type AuthResponse struct {
-	ApiKeyValid bool
-	ApiKey      string
-	UserId      string
-	Password    string
-}
-
-type AuthServiceIf interface {
-	Init(ad AuthDatastore)
-	Add(authReq *AuthRequest) (*AuthRequest, error)
-	Remove(authReq *AuthRequest) (*AuthRequest, error)
-	// UpdatePassword
-	Authenticate(authReq *AuthRequest) (bool, error)
-}
-
-func mapAuthRequestToAuthRecord(authReq *AuthRequest) *AuthRecord {
-	return &AuthRecord{
-		ApiKeyValid: authReq.ApiKeyValid,
-		ApiKey:      authReq.ApiKey,
-		UserId:      authReq.UserId,
-		Password:    authReq.Password,
-	}
-}
-
-func mapAuthRecordToAuthResponse(authRecord *AuthRecord) *AuthResponse {
-	return &AuthResponse{
-		ApiKeyValid: authRecord.ApiKeyValid,
-		ApiKey:      authRecord.ApiKey,
-		UserId:      authRecord.UserId,
-		Password:    authRecord.Password,
-	}
-}
-
-type AuthService struct {
-	authDatastore AuthDatastore
-}
-
-func (as *AuthService) Init(ad AuthDatastore) {
-	as.authDatastore = ad
-}
-
-func (as *AuthService) Add(authReq *AuthRequest) (*AuthResponse, error) {
-	aRec := mapAuthRequestToAuthRecord(authReq)
-	_, err := as.authDatastore.Insert(aRec)
-	fmt.Println("Add: ", aRec)
-	fmt.Println("Existing Add err: ", err)
-	authRsp := mapAuthRecordToAuthResponse(aRec)
-	return authRsp, err
-}
-
-func (as *AuthService) Remove(authReq *AuthRequest) (*AuthResponse, error) {
-	aRec := mapAuthRequestToAuthRecord(authReq)
-	_, err := as.authDatastore.Remove(aRec)
-	fmt.Println("Existing Remove err: ", err)
-	authRsp := mapAuthRecordToAuthResponse(aRec)
-	return authRsp, err
-}
-
-func (as *AuthService) Authenticate(authReq *AuthRequest) (bool, error) {
-	aRec := mapAuthRequestToAuthRecord(authReq)
-	aRec, err := as.authDatastore.Get(aRec)
-	if err != nil {
-		fmt.Println("Existing Authenticate (false) err: ", err)
-		return false, err
-	}
-	if aRec.Password == authReq.Password{
-		fmt.Println("Existing Authenticate (true) err: ", err)
-	}else{
-		fmt.Println("Existing Authenticate (false) err: ", err)
-		return false, err
-	}
-	return true, nil
-}
-
+*/
 /*
  * Map containing Auth Record
  * Key : ApiKey or UserId
@@ -96,21 +19,6 @@ func (as *AuthService) Authenticate(authReq *AuthRequest) (bool, error) {
  * TBD: reissue API Key
  * Divide the project into 3 files: main.go, auth.go, auth_datastore.go
  */
-type AuthRecord struct {
-	ApiKeyValid bool
-	ApiKey      string
-	UserId      string
-	Password    string
-}
-
-// TBD: Read about Go Interfaces
-type AuthDatastore interface {
-	Init()
-	Insert(authRecord *AuthRecord) (*AuthRecord, error)
-	Get(authRecord *AuthRecord) (*AuthRecord, error)
-	Remove(authRecord *AuthRecord) (*AuthRecord, error)
-	Update(authRecord *AuthRecord) (*AuthRecord, error)
-}
 
 type AuthMapDatastore struct {
 	authMap map[string]AuthRecord
@@ -190,7 +98,7 @@ func (amd *AuthMapDatastore) Get(authRecordIn *AuthRecord) (*AuthRecord, error) 
 	} else {
 		key = authRecordIn.UserId
 	}
-	fmt.Println("key:",key)
+	fmt.Println("key:", key)
 	if len(key) == 0 {
 		return nil, errors.New("invalid key")
 	}

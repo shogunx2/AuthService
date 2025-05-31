@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	DAO "github.com/ayushnema/AuthService/DAO"
+	Services "github.com/ayushnema/AuthService/Services"
 )
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
@@ -11,16 +14,21 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	amd := AuthMapDatastore{}
-	amd.Init()
+	/*
+		amd := AuthMapDatastore{}
+		amd.Init()
+	*/
 
-	as := AuthService{}
-	as.Init(&amd)
+	apgd := DAO.AuthPGDatastore{}
+	apgd.Init()
+
+	as := Services.AuthService{}
+	as.Init(&apgd)
 
 	http.HandleFunc("/", helloHandler)
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("add function start")
-		var authReq AuthRequest
+		var authReq Services.AuthRequest
 		fmt.Println("Body: ", r.Body)
 		err := json.NewDecoder(r.Body).Decode(&authReq)
 		if err != nil {
@@ -44,7 +52,7 @@ func main() {
 
 	http.HandleFunc("/remove", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("add function start")
-		var authReq AuthRequest
+		var authReq Services.AuthRequest
 		fmt.Println("Body: ", r.Body)
 		err := json.NewDecoder(r.Body).Decode(&authReq)
 		if err != nil {
@@ -67,7 +75,7 @@ func main() {
 	})
 
 	http.HandleFunc("/authenticate", func(w http.ResponseWriter, r *http.Request) {
-		var authReq AuthRequest
+		var authReq Services.AuthRequest
 		err := json.NewDecoder(r.Body).Decode(&authReq)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
