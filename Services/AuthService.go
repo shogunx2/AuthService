@@ -3,7 +3,7 @@ package services
 import (
 	"fmt"
 
-	DAO "github.com/shogunx2/AuthService/DAO"
+	DAO "github.com/shogunx2/AuthService/dao"
 )
 
 type AuthRequest struct {

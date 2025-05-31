@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	DAO "github.com/shogunx2/AuthService/DAO"
+	DAO "github.com/shogunx2/AuthService/dao"
 	Services "github.com/shogunx2/AuthService/services"
+
+	_ "github.com/lib/pq"
 )
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
